@@ -1,4 +1,4 @@
-package com.viveret.kotlinscale
+package com.viveret.scale
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4

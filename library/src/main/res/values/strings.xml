@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Kotlin Scale</string>
+    <string name="interpolator_linear">Linear</string>
 </resources>

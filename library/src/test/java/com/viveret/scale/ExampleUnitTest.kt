@@ -1,4 +1,4 @@
-package com.viveret.kotlinscale
+package com.viveret.scale
 
 import org.junit.Test
 
