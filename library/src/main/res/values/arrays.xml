@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="entries_list_preference">pref1, pref2</string-array>
+    <string-array name="entryvalues_list_preference">prefVal1, prefVal2</string-array>
+
+    <string-array name="optimizers">
+        <item>@string/optimizer_adaptive_gradient</item>
+        <item>@string/optimizer_rmsprop</item>
+        <item>@string/optimizer_adam</item>
+        <item>@string/optimizer_adamax</item>
+        <item>@string/optimizer_gradient_descent</item>
+        <item>@string/optimizer_momentum</item>
+        <item>@string/optimizer_nesterov_momentum</item>
+    </string-array>
+    <string-array name="camera_color_modes">
+        <item>@string/camera_color_mode_red</item>
+        <item>@string/camera_color_mode_yellow</item>
+        <item>@string/camera_color_mode_green</item>
+        <item>@string/camera_color_mode_cyan</item>
+        <item>@string/camera_color_mode_blue</item>
+        <item>@string/camera_color_mode_magenta</item>
+        <item>@string/camera_color_mode_greyscale</item>
+        <item>@string/camera_color_mode_luminance</item>
+    </string-array>
+</resources>
