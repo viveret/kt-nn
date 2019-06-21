@@ -11,7 +11,6 @@ interface Scenario {
     val name: String
     val summary: String
     val source: String
-    val iconId: Int
     fun compatibleWithNetwork(project: NeuralNetProject): Boolean
     fun init(project: NeuralNetProject, context: Context)
 }

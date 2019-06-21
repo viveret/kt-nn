@@ -15,17 +15,34 @@ repositories {
 android {
     compileSdkVersion 28
     defaultConfig {
-        //applicationId "com.viveret.kotlinscale"
         minSdkVersion 15
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++14 -Wc++14-extensions -fexceptions -funwind-tables -I/home/viveret/Programming/tiny-dnn"
+                arguments "-DCMAKE_CXX_STANDARD=14", "-DDNN_USE_IMAGE_API=1"
+            }
+        }
+        ndk {
+            abiFilters "arm64-v8a", "x86_64", "armeabi-v7a", "x86"
+        }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+            version "3.10.2"
         }
     }
 }
