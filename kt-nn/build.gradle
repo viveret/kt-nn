@@ -13,6 +13,9 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
+def Properties properties = new Properties()
+properties.load(project.rootProject.file("local.properties").newDataInputStream())
+
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -26,7 +29,7 @@ android {
         }
         externalNativeBuild {
             cmake {
-                cppFlags "-std=c++14 -Wc++14-extensions -fexceptions -funwind-tables -I/home/viveret/Programming/tiny-dnn"
+                cppFlags "-std=c++14 -Wc++14-extensions -fexceptions -funwind-tables -I"+properties.getProperty("cmake.tiny_dnn")
                 arguments "-DCMAKE_CXX_STANDARD=14", "-DDNN_USE_IMAGE_API=1"
             }
         }
