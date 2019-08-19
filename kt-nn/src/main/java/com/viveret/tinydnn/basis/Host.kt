@@ -1,15 +1,14 @@
 package com.viveret.tinydnn.basis
 
-import android.content.Context
 import java.util.*
 
 class Host(val siteName: String, val title: String, override val id: UUID) : Indexable {
-    override fun isAvailable(source: DataSource, context: Context): Boolean =
-            HostedStreamPackage.fromHost(this.siteName).any { x -> x.isAvailable(source, context) }
+    override fun isAvailable(source: DataSource): Boolean =
+            HostedStreamPackage.fromHost(this.siteName).any { x -> x.isAvailable(source) }
 
-    override fun delete(source: DataSource, context: Context) {
+    override fun delete(source: DataSource) {
         for (pkg in HostedStreamPackage.fromHost(this.siteName)) {
-            pkg.delete(source, context)
+            pkg.delete(source)
         }
     }
 

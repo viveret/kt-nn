@@ -1,7 +1,7 @@
 package com.viveret.tinydnn.data.io
 
+import com.viveret.tinydnn.basis.AttributeResolver
 import com.viveret.tinydnn.basis.Vect
 
-interface VectReader : SimpleReader<Vect> {
-    fun read(destination: Array<Vect>, maxLength: Long): Int
+interface VectReader : SimpleReader<Vect>, AttributeResolver {
 }

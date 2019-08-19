@@ -91,10 +91,10 @@ open class AbstractNetworkModelWithWeights(override val nativeObjectHandle: Long
 
     override fun predict(`in`: FloatArray): Vect = Vect.attach(0) // TODO: implement
 
-    override fun train(optimizer: Optimizer, inputs: List<Vect>, class_labels: List<Long>, batch_size: Long,
+    override fun train(optimizer: Optimizer, inputs: Array<Vect>, class_labels: Array<Long>, batch_size: Long,
                        epoch: Int, on_batch_enumerate: () -> Unit,
                        on_epoch_enumerate: () -> Unit, reset_weights: Boolean,
-                       n_threads: Int, t_cost: List<Vect>): TrainResult {
+                       n_threads: Int, t_cost: Array<Vect>): TrainResult {
         val inputsNative = LongArray(inputs.size)
         for (i in inputs.indices) {
             inputsNative[i] = inputs[i].nativeObjectHandle
@@ -120,24 +120,13 @@ open class AbstractNetworkModelWithWeights(override val nativeObjectHandle: Long
 
     private lateinit var on_batch_enumerate: () -> Unit
 
-    override fun fit(optimizer: Optimizer, inputs: List<Vect>, desired_outputs: List<Vect>, batch_size: Long,
+    override fun fit(optimizer: Optimizer, inputs: Array<Vect>, desired_outputs: Array<Vect>, batch_size: Long,
                      epoch: Int, on_batch_enumerate: () -> Unit,
                      on_epoch_enumerate: () -> Unit, reset_weights: Boolean,
-                     n_threads: Int, t_cost: List<Vect>): TrainResult {
-        val inputsNative = LongArray(inputs.size)
-        for (i in inputs.indices) {
-            inputsNative[i] = inputs[i].nativeObjectHandle
-        }
-
-        val desired_outputsNative = LongArray(desired_outputs.size)
-        for (i in desired_outputs.indices) {
-            desired_outputsNative[i] = desired_outputs[i].nativeObjectHandle
-        }
-
-        val costsNative = LongArray(t_cost.size)
-        for (i in t_cost.indices) {
-            costsNative[i] = t_cost[i].nativeObjectHandle
-        }
+                     n_threads: Int, t_cost: Array<Vect>): TrainResult {
+        val inputsNative = LongArray(inputs.size) { inputs[it].nativeObjectHandle }
+        val desired_outputsNative = LongArray(desired_outputs.size) { desired_outputs[it].nativeObjectHandle }
+        val costsNative = LongArray(t_cost.size) { t_cost[it].nativeObjectHandle }
 
         this.on_epoch_enumerate = on_epoch_enumerate
         this.on_batch_enumerate = on_batch_enumerate
@@ -158,20 +147,14 @@ open class AbstractNetworkModelWithWeights(override val nativeObjectHandle: Long
 
     override fun batchAt(): Long = jniGetBatchAt(nativeObjectHandle)
 
-    override fun fit(optimizer: Optimizer, inputs: List<Vect>, desired_outputs: List<Vect>, batch_size: Long, epoch: Int): TrainResult {
-        val inputsNative = LongArray(inputs.size)
-        for (i in inputs.indices) {
-            inputsNative[i] = inputs[i].nativeObjectHandle
-        }
+    override fun fit(optimizer: Optimizer, inputs: Array<Vect>, desired_outputs: Array<Vect>, batch_size: Long, epoch: Int): TrainResult {
+        val inputsNative = LongArray(inputs.size) { inputs[it].nativeObjectHandle }
+        val desired_outputsNative = LongArray(desired_outputs.size) { desired_outputs[it].nativeObjectHandle }
 
-        val desired_outputsNative = LongArray(desired_outputs.size)
-        for (i in desired_outputs.indices) {
-            desired_outputsNative[i] = desired_outputs[i].nativeObjectHandle
-        }
         return TrainResult.values()[jniFit(nativeObjectHandle, optimizer.nativeObjectHandle, inputsNative, desired_outputsNative, batch_size, epoch)]
     }
 
-    override fun train(optimizer: Optimizer, inputs: List<Vect>, class_labels: List<Long>, batch_size: Long, epoch: Int): TrainResult = TrainResult.FAILURE
+    override fun train(optimizer: Optimizer, inputs: Array<Vect>, class_labels: Array<Long>, batch_size: Long, epoch: Int): TrainResult = TrainResult.FAILURE
 
     override fun set_netphase(phase: net_phase) = jniSetNetPhase(nativeObjectHandle, phase.ordinal)
 

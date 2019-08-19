@@ -1,23 +1,27 @@
 package com.viveret.tinydnn.basis
 
 import android.content.Context
-import com.viveret.tinydnn.data.DataValues
+import com.viveret.tinydnn.data.io.InputSelection
 import com.viveret.tinydnn.project.NeuralNetProject
-import com.viveret.tinydnn.project.ProjectProvider
 import org.json.JSONObject
-import java.io.File
 import java.util.*
 
-class JsonStreamPackage(val json: JSONObject): AbstractStreamPackage() {
-    override fun loadDataValues(source: DataSource, context: Context, fitTo: Boolean, project: NeuralNetProject?): DataValues {
-        val fmt = (context as ProjectProvider).getDataFormat(this.formatId)
-        val files = streams.values.map { it to File(it.sourcePath(DataSource.LocalFile, context)) }.toMap()
+class JsonStreamPackage(context: Context, val json: JSONObject) : AbstractStreamPackage(context) {
+    override fun open(
+        source: DataSource,
+        fitTo: Boolean,
+        project: NeuralNetProject?
+    ): InputDataValueStream {
+        val files = InputSelection()
+        for (it in streams.values) {
+            files[it.role] = InputSelection.FileItem(it, DataSource.LocalFile)
+        }
 
-        return this.loadStreams(fmt, files, fitTo, project)
+        return InputDataValueStream(context, project!!, files)
     }
 
-    override fun sizeOfStreams(source: DataSource, context: Context): Long =
-        this.streams.values.map { it.size(source, context) }.sum()
+    override fun sizeOfStreams(source: DataSource): Long =
+        this.streams.values.map { it.size(source) }.sum()
 
     override val title: String = json.getString("title")
     override val dataName: String = json.getString("summary")
@@ -30,7 +34,7 @@ class JsonStreamPackage(val json: JSONObject): AbstractStreamPackage() {
             val array = json.getJSONArray("files")
             return List(array.length()) {
                 val item = array.getJSONObject(it)
-                FileStream(item, host, this)
+                FileStream(context, item, host, this)
             }.map { it.role to (it as Stream) }.toMap()
         }
 

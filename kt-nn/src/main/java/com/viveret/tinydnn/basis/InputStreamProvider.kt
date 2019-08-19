@@ -4,5 +4,5 @@ import android.content.Context
 import java.io.InputStream
 
 interface InputStreamProvider {
-    fun open(context: Context): InputStream
+    fun open(context: Context): BetterInputStream
 }

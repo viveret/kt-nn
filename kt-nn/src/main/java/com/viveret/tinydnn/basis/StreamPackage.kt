@@ -1,7 +1,5 @@
 package com.viveret.tinydnn.basis
 
-import android.content.Context
-import com.viveret.tinydnn.data.DataValues
 import com.viveret.tinydnn.project.NeuralNetProject
 import java.util.*
 
@@ -14,7 +12,7 @@ interface StreamPackage: Indexable {
 
     val streams: Map<DataRole, Stream>
 
-    fun sizeOfStreams(source: DataSource, context: Context): Long
+    fun sizeOfStreams(source: DataSource): Long
 
-    fun loadDataValues(source: DataSource, context: Context, fitTo: Boolean, project: NeuralNetProject?): DataValues
+    fun open(source: DataSource, fitTo: Boolean, project: NeuralNetProject?): InputDataValueStream
 }

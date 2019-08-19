@@ -119,15 +119,15 @@ interface INetworkModelWithWeights : JniObject, INetworkModel {
      * equal cost for every target)
      */
     fun train(optimizer: Optimizer,
-              inputs: List<Vect>,
-              class_labels: List<Long>,
+              inputs: Array<Vect>,
+              class_labels: Array<Long>,
               batch_size: Long,
               epoch: Int,
               on_batch_enumerate: () -> Unit,
               on_epoch_enumerate: () -> Unit,
               reset_weights: Boolean = false,
               n_threads: Int = Sizes.CNN_TASK_SIZE,
-              t_cost: List<Vect> = ArrayList()): TrainResult
+              t_cost: Array<Vect> = emptyArray()): TrainResult
 
 
     /**
@@ -183,15 +183,15 @@ interface INetworkModelWithWeights : JniObject, INetworkModel {
      * equal cost for every target)
     </mse></tensor_t></tensor_t></mse></Vect></Vect></sequential> */
     fun fit(optimizer: Optimizer,
-            inputs: List<Vect>,
-            desired_outputs: List<Vect>,
+            inputs: Array<Vect>,
+            desired_outputs: Array<Vect>,
             batch_size: Long,
             epoch: Int,
             on_batch_enumerate: () -> Unit,
             on_epoch_enumerate: () -> Unit,
             reset_weights: Boolean = false,
             n_threads: Int = Sizes.CNN_TASK_SIZE, //          = CNN_TASK_SIZE,
-            t_cost: List<Vect> = ArrayList()): TrainResult
+            t_cost: Array<Vect> = emptyArray()): TrainResult
 
     /**
      * @param optimizer          optimizing algorithm for training
@@ -201,8 +201,8 @@ interface INetworkModelWithWeights : JniObject, INetworkModel {
      * @param epoch              number of training epochs
      */
     fun fit(optimizer: Optimizer,
-            inputs: List<Vect>,
-            desired_outputs: List<Vect>,
+            inputs: Array<Vect>,
+            desired_outputs: Array<Vect>,
             batch_size: Long, // = 1,
             epoch: Int): TrainResult  //  = 1
 
@@ -214,8 +214,8 @@ interface INetworkModelWithWeights : JniObject, INetworkModel {
      * @param epoch              number of training epochs
      */
     fun train(optimizer: Optimizer,
-              inputs: List<Vect>,
-              class_labels: List<Long>,
+              inputs: Array<Vect>,
+              class_labels: Array<Long>,
               batch_size: Long, // = 1,
               epoch: Int): TrainResult  //  = 1
 

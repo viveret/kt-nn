@@ -1,9 +1,9 @@
 package com.viveret.tinydnn.basis
 
-enum class DataRole {
-    NA,
-    Input,
-    FitTo,
-    InputLabels,
-    FitToLabels
+enum class DataRole(val altPurpose: DataRole) {
+    NA(NA),
+    Input(NA),
+    FitTo(Input),
+    InputLabels(NA),
+    FitToLabels(InputLabels)
 }

@@ -1,5 +1,5 @@
 package com.viveret.tinydnn.util.async
 
 interface OnItemSelectedListener {
-    fun onSelected(item: Any): Boolean
+    fun onSelected(item: Any): OnSelectedResult
 }

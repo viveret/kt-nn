@@ -1,6 +1,6 @@
 package com.viveret.tinydnn.data.challenge.easy
 
-import com.viveret.tinydnn.R2
+import com.viveret.tinydnn.R
 import com.viveret.tinydnn.data.DataMethod
 import com.viveret.tinydnn.data.challenge.ChallengeMetaInfo
 import com.viveret.tinydnn.data.challenge.DifficultyRating
@@ -11,8 +11,8 @@ import java.util.*
 
 class MnistChallenge: ChallengeMetaInfo {
     override val id: UUID = UUID.fromString("cc2fefc4-69d7-11e9-a923-1681be663d3e")
-    override val name: Int = R2.string.challenge_mnist
-    override val description: Int = R2.string.challenge_mnist_desc
+    override val name: Int = R.string.challenge_mnist
+    override val description: Int = R.string.challenge_mnist_desc
     override val difficulty: DifficultyRating = DifficultyRating.Hard
     override val minAccuracyToPass: Float = 0.90f
 

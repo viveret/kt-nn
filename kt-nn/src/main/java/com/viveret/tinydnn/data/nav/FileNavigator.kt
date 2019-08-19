@@ -1,6 +1,8 @@
 package com.viveret.tinydnn.data.nav
 
+import android.util.Log
 import com.viveret.tinydnn.util.async.OnItemSelectedListener
+import com.viveret.tinydnn.util.async.OnSelectedResult
 import com.viveret.tinydnn.util.nav.NavigationItem
 import java.io.File
 import java.util.*
@@ -26,12 +28,13 @@ open class FileNavigator : NavigationController, NavigationListener, OnItemSelec
         addRedirect("/storage/emulated", "/storage/emulated/0")
     }
 
-    override fun onSelected(item: Any): Boolean {
+    override fun onSelected(item: Any): OnSelectedResult {
         return if (item is NavigationItem) {
-            this.assign(item.file.canonicalPath)
-            true
+            OnSelectedResult(true) {
+                this.assign(item.file.canonicalPath)
+            }
         } else {
-            false
+            OnSelectedResult(false)
         }
     }
 
@@ -51,6 +54,7 @@ open class FileNavigator : NavigationController, NavigationListener, OnItemSelec
             virtualFileSystemPaths.containsKey(location) -> onChange(location, virtualFileSystemPaths[location]!!(location))
             else -> {
                 val currentFolder = File(if (location.isNotEmpty()) location else "/")
+                Log.e("com.viveret.pocketn2", "Traversing ${currentFolder.absolutePath}")
                 val currentEntries = navItemsAt(currentFolder)
                 onChange(location, currentEntries)
             }

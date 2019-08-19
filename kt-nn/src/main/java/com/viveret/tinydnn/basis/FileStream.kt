@@ -1,10 +1,13 @@
 package com.viveret.tinydnn.basis
 
 import android.content.Context
+import com.viveret.tinydnn.data.io.FileInputStream
+import com.viveret.tinydnn.data.io.HttpInputStream
 import com.viveret.tinydnn.data.io.SmartFileInputStream
 import com.viveret.tinydnn.data.io.SmartFileOutputStream
 import com.viveret.tinydnn.error.UserException
 import org.json.JSONObject
+import java.io.DataInputStream
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
@@ -13,7 +16,8 @@ import java.net.URL
 import java.util.*
 import kotlin.collections.ArrayList
 
-class FileStream: Stream {
+class FileStream : Stream {
+    val context: Context
     override val name: String
     override val extension: String
     override val namespace: String
@@ -21,37 +25,75 @@ class FileStream: Stream {
     override val id: UUID
     override val host: Host?
     override val role: DataRole
+
+    constructor(
+        context: Context,
+        name: String,
+        extension: String,
+        namespace: String,
+        mime: String,
+        id: UUID,
+        host: Host?,
+        role: DataRole
+    ) {
+        this.context = context
+        this.name = name
+        this.extension = extension
+        this.namespace = namespace
+        this.mime = mime
+        this.id = id
+        this.host = host
+        this.role = role
+    }
+
+    override fun getInt(attr: DataAttr): Int? {
+        return when (attr) {
+            DataAttr.ByteCount -> File(this.sourcePath(DataSource.LocalFile)).length().toInt()
+            DataAttr.ElementCount -> {
+                return DataInputStream(File(this.sourcePath(DataSource.LocalFile)).inputStream()).use {
+                    it.readInt()
+                    it.readInt()
+                }
+            }
+            else -> null
+        }
+    }
+
+    override fun getString(attr: DataAttr): String? = when (attr) {
+        DataAttr.MIME -> mime
+        else -> error("Invalid attr $attr")
+    }
+
+    override fun getBoolean(attr: DataAttr): Boolean? {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     private var tempFile: File? = null
     var protocol: String = ""
     var args: String = ""
     var remotePath: String = ""
 
-    constructor(namespace: String, name: String, mime: String, extension: String, id: UUID, role: DataRole = DataRole.NA, host: Host? = null, protocol: String = "", args: String = "", remotePath: String? = null) {
-        this.id = id
-        this.name = name
-        this.namespace = namespace
-        this.mime = mime
-        this.extension = extension
-        this.host = host
-        this.role = role
+    constructor(context: Context, namespace: String, name: String, mime: String, extension: String, id: UUID, role: DataRole = DataRole.NA, host: Host? = null, protocol: String = "", args: String = "", remotePath: String? = null):
+            this(context, name, extension, namespace, mime, id, host, role) {
         this.protocol = protocol
         this.args = if (args.isNotEmpty()) "?$args" else args
         this.remotePath = remotePath ?: "$namespace/$name$extension$args"
     }
 
-    constructor(json: JSONObject, host: Host, suite: StreamPackage): this(URL("http${if (suite.encryptedProtocol) "s" else ""}://${host.siteName}/${json.getString("endpoint")}"),
+    constructor(context: Context, json: JSONObject, host: Host, suite: StreamPackage): this(context, URL("http${if (suite.encryptedProtocol) "s" else ""}://${host.siteName}/${json.getString("endpoint")}"),
         UUID.fromString(json.getString("id")), DataRole.valueOf(json.getString("role")), host)
 
-    constructor(file: File, id: UUID, role: DataRole = DataRole.NA, host: Host? = null, protocol: String = "", args: String = "", remotePath: String? = null):
-            this(file.parent, file.nameWithoutExtension, extensionToMime(file.extension), ".${file.name.substringAfter(".")}", id, role, host, protocol, args, remotePath)
+    constructor(context: Context, file: File, id: UUID, role: DataRole = DataRole.NA, host: Host? = null, protocol: String = "", args: String = "", remotePath: String? = null):
+            this(context, file.parent, file.nameWithoutExtension, extensionToMime(file.extension), ".${file.name.substringAfter(".")}", id, role, host, protocol, args, remotePath)
 
-    constructor(path: String, id: UUID):
-            this(File(path), id)
+    constructor(context: Context, path: String, id: UUID):
+            this(context, File(path), id)
 
-    constructor(url: URL, id: UUID, role: DataRole = DataRole.NA, host: Host? = null):
-            this(File(url.path), id, role, host, protocol = url.protocol, args = url.query ?: "", remotePath = url.path)
+    constructor(context: Context, url: URL, id: UUID, role: DataRole = DataRole.NA, host: Host? = null):
+            this(context, File(url.path), id, role, host, protocol = url.protocol, args = url.query ?: "", remotePath = url.path)
 
-    constructor(fileName: String, id: UUID, role: DataRole = DataRole.NA, url: URL? = null, host: Host? = null) {
+    constructor(context: Context, fileName: String, id: UUID, role: DataRole = DataRole.NA, url: URL? = null, host: Host? = null) {
+        this.context = context
         this.id = id
         this.host = host
         this.role = role
@@ -72,7 +114,7 @@ class FileStream: Stream {
         }
     }
 
-    override fun destinationStream(source: DataSource, context: Context): OutputStream {
+    override fun destinationStream(source: DataSource): OutputStream {
         return when (source) {
             DataSource.TempFile -> {
                 this.tempFile = File.createTempFile(this.name, this.extension)
@@ -91,7 +133,7 @@ class FileStream: Stream {
         }
     }
 
-    override fun sourcePath(source: DataSource, context: Context): String {
+    override fun sourcePath(source: DataSource): String {
         return when(source) {
             DataSource.TempFile -> if (this.tempFile != null) this.tempFile!!.canonicalPath else throw UserException("Temp file does not exist for ${this}")
             DataSource.RemoteFile -> if (host != null) "${this.protocol}://${host.siteName}$remotePath" else throw Exception("Source $source not supported")
@@ -107,7 +149,7 @@ class FileStream: Stream {
         }
     }
 
-    override fun size(source: DataSource, context: Context): Long {
+    override fun size(source: DataSource): Long {
         return when(source) {
             DataSource.TempFile -> if (this.tempFile != null) this.tempFile!!.length() else throw UserException("Temp file does not exist for ${this}")
             DataSource.RemoteFile -> if (host != null) -1L else throw Exception("Source $source not supported")
@@ -123,34 +165,28 @@ class FileStream: Stream {
         }
     }
 
-    override fun sourceStream(source: DataSource, context: Context): InputStream {
+    override fun sourceStream(source: DataSource): BetterInputStream {
         return when (source) {
-            DataSource.TempFile -> SmartFileInputStream(this.tempFile!!)
+            DataSource.TempFile -> FileInputStream(this.tempFile!!, this)
             DataSource.LocalFile -> {
-                val f = File(this.sourcePath(source, context))
+                val f = File(this.sourcePath(source))
                 if (f.exists() && f.isFile) {
-                    SmartFileInputStream(f)
+                    FileInputStream(f, this)
                 } else {
                     throw Exception("File not found: ${f.canonicalPath}")
                 }
             }
             DataSource.RemoteFile -> {
-                val url = this.sourcePath(source, context)
-                val conn = URL(url).openConnection() as HttpURLConnection
-                val code = conn.responseCode
-                return when (code) {
-                    200 -> conn.inputStream
-                    else -> throw Exception("$url returned $code: ${conn.responseMessage}")
-                }
+                HttpInputStream(URL(this.sourcePath(source)), this)
             }
             else -> throw IllegalArgumentException("Source $source is not supported")
         }
     }
 
-    override fun isAvailable(source: DataSource, context: Context): Boolean {
+    override fun isAvailable(source: DataSource): Boolean {
         return when (source) {
             DataSource.LocalFile -> {
-                val f = File(this.sourcePath(source, context))
+                val f = File(this.sourcePath(source))
                 return f.exists() && f.isFile
             }
             DataSource.TempFile -> this.tempFile != null
@@ -160,15 +196,12 @@ class FileStream: Stream {
         }
     }
 
-    override fun delete(source: DataSource, context: Context) {
+    override fun delete(source: DataSource) {
         when (source) {
             DataSource.LocalFile -> {
-                val suiteDir = File(context.cacheDir, this.host!!.id.toString())
-                if (suiteDir.exists() && suiteDir.isDirectory) {
-                    val file = File(suiteDir, this.id.toString())
-                    if (file.isFile) {
-                        file.delete()
-                    }
+                val file = File(this.sourcePath(source))
+                if (file.isFile) {
+                    file.delete()
                 }
             }
             DataSource.TempFile -> {
@@ -178,9 +211,9 @@ class FileStream: Stream {
             else -> throw Exception("Cannot delete $source")
         }
 
-        if (this.isAvailable(source, context)) {
-            throw Exception("Deleted but still exists, problems can occur")
-        }
+//        if (this.isAvailable(source)) {
+//            throw Exception("Deleted but still exists, problems can occur")
+//        }
     }
 
     override fun toString(): String = "$name.$extension"
@@ -191,7 +224,7 @@ class FileStream: Stream {
     override fun hashCode(): Int = id.hashCode()
 
     companion object {
-        private fun extensionToMime(extension: String): String {
+        fun extensionToMime(extension: String): String {
             return when (extension) {
                 "txt" -> "application/text"
                 "gz" -> "application/gzip"

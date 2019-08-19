@@ -1,22 +1,18 @@
 package com.viveret.tinydnn.basis
 
 import android.content.Context
-import com.viveret.tinydnn.data.DataValues
-import com.viveret.tinydnn.data.train.TrainingDataReader
-import com.viveret.tinydnn.data.train.TrainingDataValues
-import com.viveret.tinydnn.project.NeuralNetProject
 import java.io.File
 
-abstract class AbstractStreamPackage : StreamPackage {
-    override fun isAvailable(source: DataSource, context: Context): Boolean =
-        this.streams.values.all { f -> f.isAvailable(source, context) }
+abstract class AbstractStreamPackage(val context: Context) : StreamPackage {
+    override fun isAvailable(source: DataSource): Boolean =
+        this.streams.values.all { f -> f.isAvailable(source) }
 
-    override fun delete(source: DataSource, context: Context) {
+    override fun delete(source: DataSource) {
         if (source == DataSource.LocalFile) {
             val suiteDir = File(context.cacheDir, this.id.toString())
             if (suiteDir.isDirectory) {
                 for (f in this.streams.values) {
-                    f.delete(source, context)
+                    f.delete(source)
                 }
                 suiteDir.deleteRecursively()
             }
@@ -24,39 +20,36 @@ abstract class AbstractStreamPackage : StreamPackage {
             throw IllegalArgumentException("Cannot delete $source")
         }
 
-        if (this.isAvailable(source, context)) {
-            throw Exception("Deleted but still exists, problems can occur")
-        }
+//        if (this.isAvailable(source)) {
+//            throw Exception("Deleted but still exists, problems can occur")
+//        }
     }
 
-    fun loadStreams(
-        fmt: TrainingDataReader,
-        files: Map<Stream, File>,
-        fitTo: Boolean,
-        project: NeuralNetProject?
-    ): DataValues {
-        val data = if (fitTo) {
-            fmt.getTrainingData(files, this, project)!!
-        } else {
-            fmt.getDataValues(files, this, project)
-        }
+//    fun read(
+//        fmt: DataSliceReader,
+//        files: InputSelection,
+//        destination: DataValues,
+//        count: Int,
+//        project: NeuralNetProject
+//    ): Int {
+//        return 0
+////
+////        data.valueMetaInfo = this.streams.getValue(DataRole.Input)
+////        data.labelMetaInfo = this.streams[DataRole.InputLabels]
+////        if (data is TrainingDataValues) {
+////            if (fitTo && data.fitTo != null) {
+////                data.fitTo.valueMetaInfo = this.streams[DataRole.FitTo]
+////                data.fitTo.labelMetaInfo = this.streams[DataRole.FitToLabels]
+////            } else {
+////                error("data.fitTo (${data.fitTo}) != null && $fitTo was false")
+////            }
+////        }
+////
+////        return data
+//    }
 
-        data.valueMetaInfo = this.streams.getValue(DataRole.Input)
-        data.labelMetaInfo = this.streams[DataRole.InputLabels]
-        if (data is TrainingDataValues) {
-            if (fitTo && data.fitTo != null) {
-                data.fitTo.valueMetaInfo = this.streams[DataRole.FitTo]
-                data.fitTo.labelMetaInfo = this.streams[DataRole.FitToLabels]
-            } else {
-                error("data.fitTo (${data.fitTo}) != null && $fitTo was false")
-            }
-        }
-
-        return data
-    }
-
-    override fun sizeOfStreams(source: DataSource, context: Context): Long =
-        this.streams.values.map { it.size(source, context) }.sum()
+    override fun sizeOfStreams(source: DataSource): Long =
+        this.streams.values.map { it.size(source) }.sum()
 
     override fun equals(other: Any?): Boolean = other is StreamPackage && this.id == other.id
 

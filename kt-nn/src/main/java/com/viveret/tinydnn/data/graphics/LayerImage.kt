@@ -119,6 +119,6 @@ class LayerImage: JniObject {
 
         fun attach(handle: Long): LayerImage = LayerImage(handle)
 
-        val empty = Vect(emptyArray<Float>().toFloatArray())
+        val empty = Vect(emptyArray<Float>().toFloatArray(), 0)
     }
 }

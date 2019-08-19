@@ -70,7 +70,7 @@ interface Layer<edgeptr_t> : Node {
     /**
      * number of incoming connections for each output unit
      * used only for weight/bias initialization methods which require fan-in
-     * size
+     * elementCount
      * (e.g. xavier)
      * override if the layer has trainable Weights, and scale of initialization
      * is
@@ -81,7 +81,7 @@ interface Layer<edgeptr_t> : Node {
     /**
      * number of outgoing connections for each input unit
      * used only for weight/bias initialization methods which require fan-out
-     * size
+     * elementCount
      * (e.g. xavier)
      * override if the layer has trainable Weights, and scale of initialization
      * is

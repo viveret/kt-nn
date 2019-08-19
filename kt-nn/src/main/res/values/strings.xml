@@ -175,4 +175,5 @@
     <string name="select_neural_network_template">Select a Neural Network Template</string>
     <string name="weights_lbl">Weights:</string>
     <string name="train_results">Training Results</string>
+    <string name="title_mnist_pkg_gen">MNIST Package Generator</string>
 </resources>

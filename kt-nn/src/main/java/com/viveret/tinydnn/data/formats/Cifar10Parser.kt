@@ -1,42 +1,58 @@
 package com.viveret.tinydnn.data.formats
 
 import android.content.Context
-import com.viveret.tinydnn.basis.DataSource
-import com.viveret.tinydnn.basis.Stream
-import com.viveret.tinydnn.basis.Vect
-import com.viveret.tinydnn.data.io.DataSelection
+import com.viveret.tinydnn.basis.*
+import com.viveret.tinydnn.data.io.InputSelection
 import com.viveret.tinydnn.data.io.LabelReader
-import com.viveret.tinydnn.data.io.SeekRelativity
 import com.viveret.tinydnn.data.io.VectReader
+import com.viveret.tinydnn.project.NeuralNetProject
 import java.io.BufferedInputStream
 import java.io.DataInputStream
 import java.io.EOFException
-import java.util.*
 
 // https://github.com/tiny-dnn/tiny-dnn/blob/1c5259477b8b4eab376cc19fd1d55ae965ef5e5a/tiny_dnn/io/cifar10_parser.h
-class Cifar10Parser(val context: Context) : BufferedSingleTrainingDataReader() {
-    override fun countElementsIn(vectReader: LabelReader): Int = 100
+@Mime(arrayOf("application/cifar10"))
+class Cifar10Parser(val context: Context) : BufferedSingleDataSliceReader() {
 
-    override fun countElementsIn(vectReader: VectReader): Int = 100 // todo: make not static constant
+    override fun getInt(attr: DataAttr): Int? {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
-    override val formatId: UUID = UUID.fromString("176200b0-5879-11e9-8647-d663bd873d93")
-    override val inputVectReader = Cifar10InputReader(context)
-    override val inputLabelReader: LabelReader? = null
-    override val fitToVectReader = Cifar10FitToReader(context)
-    override val fitToLabelReader: LabelReader? = null
+    override fun getString(attr: DataAttr): String? {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun getBoolean(attr: DataAttr): Boolean? {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun seek(relativeTo: AnchorPoint, offset: Int): Boolean {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun vectReader(role: DataRole): VectReader? = if (role == DataRole.Input)
+        Cifar10InputReader(context)
+    else
+        Cifar10FitToReader(context)
+
+    override fun labelReader(role: DataRole): LabelReader? = null
 
     class Cifar10InputReader(context: Context) : Cifar10FileReader(context), VectReader {
         override val supportsSeek: Boolean = false
 
-        override fun seek(pos: Long, relativeTo: SeekRelativity) {
+        override fun getInt(attr: DataAttr): Int? = null
 
+        override fun getString(attr: DataAttr): String? = null
+
+        override fun getBoolean(attr: DataAttr): Boolean? = null
+
+        override fun seek(relativeTo: AnchorPoint, offset: Int): Int {
+            return 0
         }
 
-        override fun read(destination: Array<Vect>, maxLength: Long): Int = this.read(destination)
+        override fun open(inputStream: BetterInputStream) = this.openIdx(inputStream)
 
-        override fun open(dataSelection: DataSelection) = this.openIdx(dataSelection)
-
-        override fun read(destination: Array<Vect>): Int {
+        override fun read(destination: Array<Vect>, offset: Int, count: Int): Int {
             val numberOfVectsToRead = destination.size
             var numVectsRead = 0
 
@@ -55,16 +71,19 @@ class Cifar10Parser(val context: Context) : BufferedSingleTrainingDataReader() {
 
     class Cifar10FitToReader(context: Context) : Cifar10FileReader(context), VectReader {
         override val supportsSeek: Boolean = false
+        override fun getInt(attr: DataAttr): Int? = null
 
-        override fun seek(pos: Long, relativeTo: SeekRelativity) {
+        override fun getString(attr: DataAttr): String? = null
+
+        override fun getBoolean(attr: DataAttr): Boolean? = null
+
+        override fun seek(relativeTo: AnchorPoint, offset: Int): Int {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun read(destination: Array<Vect>, maxLength: Long): Int = this.read(destination)
+        override fun open(inputStream: BetterInputStream) = this.openIdx(inputStream)
 
-        override fun open(dataSelection: DataSelection) = this.openIdx(dataSelection)
-
-        override fun read(destination: Array<Vect>): Int {
+        override fun read(destination: Array<Vect>, offset: Int, count: Int): Int {
             val numberOfVectsToRead = destination.size
             val vectLength = 32 * 32 * 3L
             val possibleOutputs = 10
@@ -76,7 +95,7 @@ class Cifar10Parser(val context: Context) : BufferedSingleTrainingDataReader() {
                         floatArray[i] = 0.0f
                     }
                     floatArray[inputStream.readByte().toInt()] = 1.0f
-                    destination[vectIndex] = Vect(floatArray)
+                    destination[vectIndex] = Vect(floatArray, floatArray.size)
                     numVectsRead++
                     var skipCount = vectLength
                     while (skipCount > 0) {
@@ -96,10 +115,9 @@ class Cifar10Parser(val context: Context) : BufferedSingleTrainingDataReader() {
         private var myIsOpen = false
         protected var persistBufferIndex = 0
 
-        fun openIdx(dataSelection: DataSelection) {
-            val tmp = dataSelection.values.first { x -> ".cifar10" == x.info.extension }
-            this.stream = tmp.info
-            this.inputStream = DataInputStream(BufferedInputStream(this.stream.sourceStream(DataSource.LocalFile, context)))
+        fun openIdx(inputStream: BetterInputStream) {
+            this.stream = inputStream.source
+            this.inputStream = DataInputStream(BufferedInputStream(inputStream.currentStream))
             this.myIsOpen = true
         }
 
@@ -124,7 +142,7 @@ class Cifar10Parser(val context: Context) : BufferedSingleTrainingDataReader() {
             if (bytesLeft > 0) {
                 throw Exception("Not enough image data read (should have been $vectLength, but only read $totalBytesRead)")
             }
-            return Vect(floatArray)
+            return Vect(floatArray, floatArray.size)
         }
 
         val isOpen = myIsOpen

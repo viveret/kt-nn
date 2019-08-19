@@ -1,14 +1,15 @@
 package com.viveret.tinydnn.basis
 
 import com.viveret.tinydnn.util.JniObject
+import kotlin.math.abs
 
 class Vect private constructor(override val nativeObjectHandle: Long) : JniObject {
-    constructor(vals: FloatArray) : this(staticConstructor(vals))
+    constructor(vals: FloatArray, requiredSize: Int) : this(staticConstructor(vals, requiredSize))
 
-    constructor(vals: ArrayList<Int>) : this(vals.map { x -> x.toFloat() }.toFloatArray())
+    constructor(vals: ArrayList<Int>, requiredSize: Int) : this(vals.map { x -> x.toFloat() }.toFloatArray(), requiredSize)
 
     override fun toString(): String {
-        val sb = StringBuilder("[")
+        val sb = StringBuilder("${vals.size} [")
         if (vals.isNotEmpty()) {
             for (f in vals) {
                 sb.append(f)
@@ -32,8 +33,8 @@ class Vect private constructor(override val nativeObjectHandle: Long) : JniObjec
             for (i in 0 until this.vals.size) {
                 val a = this.vals[i]
                 val b = other.vals[i]
-                val diff = Math.abs(b - a)
-                val sum = Math.abs(a + b)
+                val diff = abs(b - a)
+                val sum = abs(a + b)
                 if (diff < 0.0001 || sum < 0.0001) {
                     continue
                 }
@@ -68,15 +69,19 @@ class Vect private constructor(override val nativeObjectHandle: Long) : JniObjec
         }
     }
 
+    override fun hashCode(): Int {
+        return vals.contentHashCode()
+    }
+
     companion object {
         @JvmStatic
-        external fun staticConstructor(vals: FloatArray): Long
+        external fun staticConstructor(vals: FloatArray, size: Int): Long
 
         @JvmStatic
         external fun jniGetElements(handle: Long): FloatArray
 
         fun attach(handle: Long): Vect = Vect(handle)
 
-        val empty = Vect(emptyArray<Float>().toFloatArray())
+        val empty = Vect(emptyArray<Float>().toFloatArray(), 0)
     }
 }

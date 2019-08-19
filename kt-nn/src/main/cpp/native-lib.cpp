@@ -2,11 +2,16 @@
 
 extern "C"
 JNIEXPORT jlong Java_com_viveret_tinydnn_basis_Vect_staticConstructor(JNIEnv *env, jobject thiz,
-                                                                         jfloatArray arrJava) {
+                                                                         jfloatArray arrJava, jint size) {
     auto fn = [&]() {
-        std::vector<float_t> *ret = new std::vector<float_t>();
         jsize sz = env->GetArrayLength(arrJava);
         jfloat *arr = env->GetFloatArrayElements(arrJava, 0);
+
+        if (size != sz) {
+            throw nn_error("Size is different");
+        }
+
+        std::vector<float_t> *ret = new std::vector<float_t>();
         for (int i = 0; i < sz; i++) {
             ret->push_back(arr[i]);
         }

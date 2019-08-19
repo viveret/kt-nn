@@ -9,4 +9,5 @@ interface TrainingMethod {
     val optimizer: Optimizer
     val dataMethod: DataMethod
     val fitToOutput: Boolean
+    val percentToInclude: Double
 }
