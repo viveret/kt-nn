@@ -134,6 +134,18 @@ JNIEXPORT jlong Java_com_viveret_tinydnn_network_AbstractNetworkModelWithWeights
 }
 
 extern "C"
+JNIEXPORT void Java_com_viveret_tinydnn_network_AbstractNetworkModelWithWeights_jniSetup(
+        JNIEnv *env, jobject thiz, jlong handle, jboolean reset_weight) {
+    auto fn = [&]() {
+        ((network<sequential> *) handle)->init_weight();
+        return (jlong) 0;
+    };
+
+    jlong ret;
+    jniTryCatch(env, fn, ret);
+}
+
+extern "C"
 JNIEXPORT jboolean
 Java_com_viveret_tinydnn_network_AbstractNetworkModelWithWeights_jniFit__Lcom_viveret_pocketn2_tinydnn_network_AbstractNetworkModelWithWeights_2JJ_3J_3JJI(
         JNIEnv *env, jobject thiz, jlong handle,
@@ -314,7 +326,7 @@ Java_com_viveret_tinydnn_network_AbstractNetworkModelWithWeights_jniPredict(JNIE
 extern "C"
 JNIEXPORT jstring
 Java_com_viveret_tinydnn_network_AbstractNetworkModelWithWeights_jniGetName__J(JNIEnv *env, jobject thiz,
-                                                             jlong handle) {
+                                                                               jlong handle) {
     auto fn = [&]() {
         return env->NewStringUTF(((network<sequential> *) handle)->name().c_str());
     };
@@ -324,6 +336,19 @@ Java_com_viveret_tinydnn_network_AbstractNetworkModelWithWeights_jniGetName__J(J
     } else {
         return env->NewStringUTF("");
     }
+}
+
+extern "C"
+JNIEXPORT void
+Java_com_viveret_tinydnn_network_AbstractNetworkModelWithWeights_jniSetName(JNIEnv *env, jobject thiz,
+                                                                               jlong handle, jstring str) {
+    auto fn = [&]() {
+        const char *nativeString = env->GetStringUTFChars(str, 0);
+        ((network<sequential> *) handle)->name() = nativeString;
+        return (jlong) 0;
+    };
+    jlong ret;
+    jniTryCatch(env, fn, ret);
 }
 
 extern "C"

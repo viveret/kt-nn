@@ -15,6 +15,9 @@ import java.io.EOFException
 class Cifar10Parser(val context: Context) : BufferedSingleDataSliceReader() {
 
     override fun getInt(attr: DataAttr): Int? {
+//        return when (attr) {
+//            DataAttr.ByteCount ->
+//        }
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

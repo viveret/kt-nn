@@ -44,7 +44,7 @@ class ConstDataValueStream(roles: Array<DataRole>) : DataSliceReader {
     private val booleanAttributes = HashMap<DataAttr, Boolean?>()
     private var dataPosition = 0
     private val size: Int
-        get() = vects.map { it.value.size }.max() ?: 0
+        get() = vects.map { it.value.size }.maxOrNull() ?: 0
 
     override fun getInt(attr: DataAttr): Int? = intAttributes[attr]
 

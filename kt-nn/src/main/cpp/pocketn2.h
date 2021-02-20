@@ -52,9 +52,9 @@
  **/
 // #define CNN_NO_SERIALIZATION
 
-#include "tiny_dnn/tiny_dnn.h"
-#include "tiny_dnn/util/image.h"
-#include "tiny_dnn/layers/layer.h"
+#include <tiny_dnn/tiny_dnn.h>
+#include <tiny_dnn/util/image.h>
+#include <tiny_dnn/layers/layer.h>
 
 #include "exceptions.h"
 

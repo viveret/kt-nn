@@ -84,7 +84,7 @@ class FileStream : Stream {
         UUID.fromString(json.getString("id")), DataRole.valueOf(json.getString("role")), host)
 
     constructor(context: Context, file: File, id: UUID, role: DataRole = DataRole.NA, host: Host? = null, protocol: String = "", args: String = "", remotePath: String? = null):
-            this(context, file.parent, file.nameWithoutExtension, extensionToMime(file.extension), ".${file.name.substringAfter(".")}", id, role, host, protocol, args, remotePath)
+            this(context, file.parent!!, file.nameWithoutExtension, extensionToMime(file.extension), ".${file.name.substringAfter(".")}", id, role, host, protocol, args, remotePath)
 
     constructor(context: Context, path: String, id: UUID):
             this(context, File(path), id)

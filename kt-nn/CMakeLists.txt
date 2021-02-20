@@ -8,6 +8,7 @@ cmake_minimum_required(VERSION 3.10.2)
 
 include_directories(
               /usr/local/include
+			  ~/Programming/tiny-dnn/
               )
 
 # Creates and names a library, sets it as either STATIC
@@ -25,8 +26,8 @@ add_library( # Sets the name of the library.
              src/main/cpp/native-lib.cpp
              src/main/cpp/index3d.cpp
              src/main/cpp/sequential_network.cpp
-        src/main/cpp/LayerBase.cpp
-        src/main/cpp/LayerImage.cpp
+	         src/main/cpp/LayerBase.cpp
+	         src/main/cpp/LayerImage.cpp
              src/main/cpp/LayerConstructors.cpp
              src/main/cpp/AbstractNetwork.cpp
              src/main/cpp/OptimizerConstructors.cpp

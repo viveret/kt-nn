@@ -6,17 +6,25 @@ import com.viveret.tinydnn.data.nav.LocalFileInfo
 import java.io.File
 
 class NavigationItem {
-    var file: FileInfo
+    var file: File
+    val canRead: Boolean
+    var fileInfo: FileInfo
     val iconResId: Int
     var lastModified: Long
     val name: String
 
     constructor(file: FileInfo) {
-        this.file = file
+        this.file = File(file.canonicalPath)
+        canRead = this.file.canRead()
+        this.fileInfo = file
         this.name = file.name
         this.lastModified = file.lastModified
         iconResId = if (file.isDirectory) {
-            R.drawable.ic_folder_black_24dp
+            if (canRead) {
+                R.drawable.ic_folder_black_24dp
+            } else {
+                R.drawable.ic_baseline_lock_24
+            }
         } else {
             when (file.extension.toLowerCase()) {
                 "png", "jpg", "jpeg", "bmp", "gif", "pdf" -> R.drawable.ic_image_black_24dp

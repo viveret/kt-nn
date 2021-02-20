@@ -20,13 +20,13 @@ class MnistPackageGenerator(val context: Context): PackageGenerator {
         val originalFile = File(options.path)
         val inputFile = File(originalFile.parent, "${originalFile.nameWithoutExtension}-images-idx3-ubyte.${originalFile.extension}")
         val inputFileId = UUID.randomUUID()
-        ret[DataRole.Input] = OutputSelection.Item(ConstDataStream(context, FileStreamProvider(inputFile.path, inputFileId), inputFile.name, FileStream.extensionToMime(inputFile.extension), inputFile.extension, inputFile.parent, DataRole.Input), GZIPOutputStream(inputFile.outputStream()))
+        ret[DataRole.Input] = OutputSelection.Item(ConstDataStream(context, FileStreamProvider(inputFile.path, inputFileId), inputFile.name, FileStream.extensionToMime(inputFile.extension), inputFile.extension, inputFile.parent!!, DataRole.Input), GZIPOutputStream(inputFile.outputStream()))
         writeMetadata(arrayOf(32, 32).toIntArray(), options.size, 2051, ret[DataRole.Input]!!)
 
         if (options.includeFitTo) {
             val fitToFile = File(originalFile.parent, "${originalFile.nameWithoutExtension}-labels-idx1-ubyte.${originalFile.extension}")
             val fitToFileId = UUID.randomUUID()
-            ret[DataRole.FitTo] = OutputSelection.Item(ConstDataStream(context, FileStreamProvider(fitToFile.path, fitToFileId), fitToFile.name, FileStream.extensionToMime(fitToFile.extension), fitToFile.extension, fitToFile.parent, DataRole.FitTo), GZIPOutputStream(fitToFile.outputStream()))
+            ret[DataRole.FitTo] = OutputSelection.Item(ConstDataStream(context, FileStreamProvider(fitToFile.path, fitToFileId), fitToFile.name, FileStream.extensionToMime(fitToFile.extension), fitToFile.extension, fitToFile.parent!!, DataRole.FitTo), GZIPOutputStream(fitToFile.outputStream()))
             writeMetadata(emptyArray<Int>().toIntArray(), options.size, 2049, ret[DataRole.FitTo]!!)
         }
         return ret

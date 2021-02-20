@@ -23,8 +23,8 @@ class LayerImage: JniObject {
         val pixelIntData = this.pixelData.map { x -> x.toInt() }
         val bmpPixelData: IntArray = when (this.format) {
             LayerImageFormat.GrayScale -> {
-                val minIntensity = pixelIntData.min()!!
-                val maxIntensity = pixelIntData.max()!!
+                val minIntensity = pixelIntData.minOrNull()!!
+                val maxIntensity = pixelIntData.maxOrNull()!!
                 val diffIntensity = maxIntensity - minIntensity
                 if (diffIntensity >= 1 || diffIntensity < 0) {
                     pixelIntData.map { x ->

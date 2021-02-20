@@ -1,10 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'com.jakewharton.butterknife'
-group='com.github.viveret'
-version='1.0.4'
+apply plugin: 'maven-publish'
+// apply plugin: 'com.github.dcendents.android-maven'
 
 repositories {
     mavenCentral()
@@ -13,20 +10,17 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-def Properties properties = new Properties()
+Properties properties = new Properties()
 properties.load(project.rootProject.file("local.properties").newDataInputStream())
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary true
-        }
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++14 -Wc++14-extensions -fexceptions -funwind-tables -I"+properties.getProperty("cmake.tiny_dnn")
@@ -54,11 +48,34 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-//    implementation 'com.android.support:appcompat-v7:28.0.0'
-    testImplementation 'junit:junit:4.12'
-//    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-//    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    testImplementation 'junit:junit:4.13.1'
 
-    implementation 'com.jakewharton:butterknife:10.1.0'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
+    implementation 'com.jakewharton:butterknife:10.2.3'
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                // Applies the component for the release build variant.
+                from components.release
+
+                // You can then customize attributes of the publication as shown below.
+                groupId = 'com.github.viveret'
+                artifactId = 'kt-nn'
+                version = android.defaultConfig.versionName
+            }
+            // Creates a Maven publication called “debug”.
+            debug(MavenPublication) {
+                // Applies the component for the debug build variant.
+                from components.debug
+
+                groupId = 'com.github.viveret'
+                artifactId = 'kt-nn-debug'
+                version = android.defaultConfig.versionName
+            }
+        }
+    }
 }

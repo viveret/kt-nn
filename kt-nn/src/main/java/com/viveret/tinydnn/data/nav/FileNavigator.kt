@@ -25,13 +25,13 @@ open class FileNavigator : NavigationController, NavigationListener, OnItemSelec
     }
 
     init {
-        addRedirect("/storage/emulated", "/storage/emulated/0")
+        // addRedirect("/storage/emulated", "/storage/emulated/0")
     }
 
     override fun onSelected(item: Any): OnSelectedResult {
         return if (item is NavigationItem) {
             OnSelectedResult(true) {
-                this.assign(item.file.canonicalPath)
+                this.assign(item.file)
             }
         } else {
             OnSelectedResult(false)
@@ -48,14 +48,15 @@ open class FileNavigator : NavigationController, NavigationListener, OnItemSelec
         }
     }
 
-    override fun onLocationChange(location: String) {
+    override fun onLocationChange(location: File) {
+        val path = location.canonicalPath
         when {
-            redirectFilePaths.containsKey(location) -> onLocationChange(redirectFilePaths[location]!!)
-            virtualFileSystemPaths.containsKey(location) -> onChange(location, virtualFileSystemPaths[location]!!(location))
+            redirectFilePaths.containsKey(path) -> onLocationChange(File(redirectFilePaths[path]!!))
+            virtualFileSystemPaths.containsKey(path) -> onChange(location, virtualFileSystemPaths[path]!!(path))
             else -> {
-                val currentFolder = File(if (location.isNotEmpty()) location else "/")
-                Log.e("com.viveret.pocketn2", "Traversing ${currentFolder.absolutePath}")
-                val currentEntries = navItemsAt(currentFolder)
+                //val currentFolder = File(if (location.isNotEmpty()) location else "/")
+                Log.e("com.viveret.pocketn2", "Traversing $path")
+                val currentEntries = navItemsAt(location)
                 onChange(location, currentEntries)
             }
         }
@@ -66,7 +67,7 @@ open class FileNavigator : NavigationController, NavigationListener, OnItemSelec
                 if (currentFolder.isDirectory) {
                     if (currentFolder.canRead()) {
                         try {
-                            val items = currentFolder.list()
+                            val items = currentFolder.list() ?: emptyArray()
                             if (items.isEmpty()) emptyArray() else items.map { x -> NavigationItem(location, x) }.toTypedArray()
                         } catch (e: Exception) {
                             throw Exception("Could not list directory $location", e)
@@ -81,7 +82,7 @@ open class FileNavigator : NavigationController, NavigationListener, OnItemSelec
                 throw Exception("Location \"$location\" does not exist")
             }
 
-    private fun onChange(location: String, entries: Array<NavigationItem>) {
+    private fun onChange(location: File, entries: Array<NavigationItem>) {
         for (listener in this.listeners) {
             listener.onLocationChange(location)
         }
@@ -97,30 +98,30 @@ open class FileNavigator : NavigationController, NavigationListener, OnItemSelec
 
     override fun back() {
         historyIndex -= 1
-        this.onLocationChange(this.location)
+        this.onLocationChange(File(this.location))
     }
 
     override fun forward() {
         historyIndex += 1
-        this.onLocationChange(this.location)
+        this.onLocationChange(File(this.location))
     }
 
-    override fun replace(location: String) {
+    override fun replace(location: File) {
         if (history.isNotEmpty()) {
             this.history.removeLast()
         }
-        this.history.add(location)
-        this.onLocationChange(this.location)
+        this.history.add(location.canonicalPath)
+        this.onLocationChange(File(this.location))
     }
 
-    override fun assign(location: String) {
-        this.history.add(if (location.endsWith('/')) location.substring(0, location.length - 1) else location)
+    override fun assign(location: File) {
+        this.history.add(location.canonicalPath) // if (location.endsWith('/')) location.substring(0, location.length - 1) else location
         this.historyIndex++
         this.onHistoryChange(this.history.toTypedArray())
-        this.onLocationChange(this.location)
+        this.onLocationChange(File(this.location))
     }
 
-    override fun reload() = this.onLocationChange(this.location)
+    override fun reload() = this.onLocationChange(File(this.location))
 
     override fun addListener(listener: NavigationListener) {
         this.listeners.add(listener)
