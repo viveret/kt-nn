@@ -3,6 +3,8 @@ apply plugin: 'kotlin-android'
 apply plugin: 'maven-publish'
 // apply plugin: 'com.github.dcendents.android-maven'
 
+android.defaultConfig.ndk.debugSymbolLevel = 'FULL'
+
 repositories {
     mavenCentral()
     google()
@@ -43,6 +45,7 @@ android {
             version "3.10.2"
         }
     }
+    ndkVersion "23.0.7123448"
 }
 
 dependencies {
